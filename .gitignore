@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.exe
+*.test
+.env
+.DS_Store
+backend/server
+frontend/dist/
+coverage/
+*.log

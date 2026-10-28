@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: stockflow
+      POSTGRES_PASSWORD: stockflow
+      POSTGRES_DB: stockflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockflow"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    ports:
+      - "8081:8080"
+    environment:
+      DATABASE_URL: postgres://stockflow:stockflow@db:5432/stockflow?sslmode=disable
+      PORT: "8080"
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
